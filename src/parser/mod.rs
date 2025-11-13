@@ -46,6 +46,7 @@ use crate::tokenizer::*;
 use sqlparser::parser::ParserState::ColumnDefinition;
 
 mod alter;
+mod cypher;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ParserError {

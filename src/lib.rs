@@ -172,6 +172,8 @@ pub mod keywords;
 pub mod parser;
 pub mod tokenizer;
 
+pub mod transformer;
+
 #[doc(hidden)]
 // This is required to make utilities accessible by both the crate-internal
 // unit-tests and by the integration tests <https://stackoverflow.com/a/44541071/1026>
