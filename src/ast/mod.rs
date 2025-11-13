@@ -95,6 +95,10 @@ pub use self::query::{
     ValueTableMode, Values, WildcardAdditionalOptions, With, WithFill, XmlNamespaceDefinition,
     XmlPassingArgument, XmlPassingClause, XmlTableColumn, XmlTableColumnOption,
 };
+pub use self::cypher::{
+    CypherStatement, Pattern, PatternElement, RelationshipDirection, RelationshipLength,
+    ReturnClause, SetClause, SetTarget,
+};
 
 pub use self::trigger::{
     TriggerEvent, TriggerExecBody, TriggerExecBodyType, TriggerObject, TriggerPeriod,
