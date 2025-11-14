@@ -68,3 +68,11 @@ features = ["serde", "visitor"]
 [[bin]]
 name = "cypher_transformer"
 path = "src/bin/cypher_transformer.rs"
+
+[[bin]]
+name = "test_transform"
+path = "test_transform.rs"
+
+[[bin]]
+name = "debug_parse"
+path = "src/bin/debug_parse.rs"

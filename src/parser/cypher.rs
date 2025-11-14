@@ -249,10 +249,16 @@ impl<'a> Parser<'a> {
         
         // Parse relationship details if present
         if self.consume_token(&Token::LBracket) {
-            // Parse variable name
-            if matches!(self.peek_token().token, Token::Word(_)) && 
-               !matches!(self.peek_nth_token(1).token, Token::Colon) {
-                variable = Some(self.parse_identifier()?);
+            // Parse variable name - if we see a word followed by colon, it's "variable:type"
+            if matches!(self.peek_token().token, Token::Word(_)) {
+                if matches!(self.peek_nth_token(1).token, Token::Colon) {
+                    // This is "variable:TYPE" pattern
+                    variable = Some(self.parse_identifier()?);
+                } else if matches!(self.peek_nth_token(1).token, Token::RBracket) {
+                    // This is just "[variable]" with no type
+                    variable = Some(self.parse_identifier()?);
+                }
+                // Note: We don't parse the variable if it's followed by something else
             }
             
             // Parse relationship types
@@ -278,8 +284,15 @@ impl<'a> Parser<'a> {
             self.expect_token(&Token::RBracket)?;
         }
         
-        self.expect_token(&Token::Minus)?;
-        let direction_right = self.consume_token(&Token::Gt);
+        let direction_right = if self.consume_token(&Token::Arrow) {
+            // This handles -> which becomes Token::Arrow
+            true
+        } else if self.consume_token(&Token::Minus) {
+            // This handles plain - followed by optional >
+            self.consume_token(&Token::Gt)
+        } else {
+            return self.expected("relationship direction (- or ->)", self.peek_token());
+        };
         
         let direction = match (direction_left, direction_right) {
             (true, true) => RelationshipDirection::Both,
