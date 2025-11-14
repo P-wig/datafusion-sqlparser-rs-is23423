@@ -76,3 +76,7 @@ path = "test_transform.rs"
 [[bin]]
 name = "debug_parse"
 path = "src/bin/debug_parse.rs"
+
+[[bin]]
+name = "test_exports"
+path = "test_exports.rs"
