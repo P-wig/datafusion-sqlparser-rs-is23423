@@ -128,6 +128,7 @@ pub use table_constraints::{
     CheckConstraint, ForeignKeyConstraint, FullTextOrSpatialConstraint, IndexConstraint,
     PrimaryKeyConstraint, TableConstraint, UniqueConstraint,
 };
+pub mod cypher;
 mod operator;
 mod query;
 mod spans;

@@ -15,13 +15,11 @@
 // specific language governing permissions and limitations
 // under the License.
 
-//! Cypher to SQL transformer CLI binary
-//! 
-//! This binary can be called by the Go server to transform Cypher queries to SQL
+//! Cypher to SQL transformer CLI binary - simplified version for testing
 
 use sqlparser::dialect::CypherDialect;
 use sqlparser::parser::Parser;
-use sqlparser::transformer::CypherToSqlTransformer;
+use sqlparser::tokenizer::Tokenizer;
 use std::env;
 use std::io::{self, Read};
 use std::process;
@@ -55,34 +53,25 @@ fn run() -> Result<(), Box<dyn std::error::Error>> {
         return Err("No Cypher query provided".into());
     }
 
-    // Parse the Cypher query using our custom dialect
+    // Parse directly as Cypher (bypass SQL parsing)
     let dialect = CypherDialect;
     
-    // For now, we'll parse it as SQL and then try to extract Cypher patterns
-    // This is a simplified approach - in a full implementation, you'd modify
-    // the main parser to recognize Cypher statements
-    let mut parser = Parser::new(&dialect).try_with_sql(&cypher_query)?;
+    // Tokenize the input
+    let tokens = Tokenizer::new(&dialect, &cypher_query).tokenize()?;
+    
+    // Create parser with tokens
+    let mut parser = Parser::new(&dialect).with_tokens(tokens);
     
     // Try to parse as a Cypher statement
-    let cypher_stmt = match parser.parse_cypher_statement() {
-        Ok(stmt) => stmt,
+    match parser.parse_cypher_statement() {
+        Ok(stmt) => {
+            println!("Successfully parsed Cypher statement:");
+            println!("{}", stmt);
+        }
         Err(e) => {
             return Err(format!("Failed to parse Cypher query: {}", e).into());
         }
-    };
-
-    // Transform to SQL
-    let transformer = CypherToSqlTransformer::new();
-    let sql_statements = transformer.transform(&cypher_stmt)?;
-
-    // Output the SQL statements
-    for (i, stmt) in sql_statements.iter().enumerate() {
-        if i > 0 {
-            println!(";\n");
-        }
-        print!("{}", stmt);
     }
-    println!(";");
 
     Ok(())
 }

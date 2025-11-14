@@ -197,15 +197,25 @@ impl<'a> Parser<'a> {
     /// Parse a node pattern: (variable:Label {properties})
     fn parse_cypher_node(&mut self) -> Result<PatternElement, ParserError> {
         // Already consumed the opening parenthesis
-        
-        let variable = if matches!(self.peek_token().token, Token::Word(_)) && 
-                         !matches!(self.peek_nth_token(1).token, Token::Colon) {
-            Some(self.parse_identifier()?)
-        } else {
-            None
-        };
-        
+    
+        let mut variable = None;
         let mut labels = vec![];
+    
+        // Check what we have: variable, label, or empty
+        if matches!(self.peek_token().token, Token::Word(_)) {
+            if self.peek_nth_token(1).token == Token::Colon {
+                // This is either "variable:Label" or ":Label"
+                variable = Some(self.parse_identifier()?);
+            } else if self.peek_nth_token(1).token == Token::RParen {
+                // This is just "variable" with no labels
+                variable = Some(self.parse_identifier()?);
+            } else {
+                // This might be a variable followed by something else
+                variable = Some(self.parse_identifier()?);
+            }
+        }
+    
+        // Parse labels
         while self.consume_token(&Token::Colon) {
             labels.push(self.parse_identifier()?);
         }
@@ -333,7 +343,7 @@ impl<'a> Parser<'a> {
         let items = self.parse_projection()?;
         
         let order_by = if self.parse_keywords(&[Keyword::ORDER, Keyword::BY]) {
-            self.parse_order_by_expr_list()?
+            vec![self.parse_order_by_expr()?]
         } else {
             vec![]
         };
@@ -417,7 +427,7 @@ impl<'a> Parser<'a> {
         
         // Return as a function call to represent the map
         Ok(Expr::Function(Function {
-            name: ObjectName(vec![Ident::new("MAP")]),
+            name: ObjectName(vec![ObjectNamePart::Identifier(Ident::new("MAP"))]),
             parameters: FunctionArguments::List(FunctionArgumentList {
                 duplicate_treatment: None,
                 args,
@@ -427,6 +437,8 @@ impl<'a> Parser<'a> {
             null_treatment: None,
             over: None,
             within_group: vec![],
+            args: FunctionArguments::None, // Add this missing field
+            uses_odbc_syntax: false, // Add this missing field
         }))
     }
 }
