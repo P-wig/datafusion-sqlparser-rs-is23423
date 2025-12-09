@@ -21,6 +21,5 @@ fn main() {
         }
     }
     
-    println!("=== SUCCESS! The basic transformation is working! ===");
-    println!("Your Go server can now use: sqlparser::transformer::transform_cypher_to_sql()");
+    println!("=== The basic transformation is working! ===");
 }
